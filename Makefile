@@ -151,7 +151,8 @@ UPROGS=\
 	$U/_dorphan\
 	$U/_sync\
         $U/_uptime\
-        $U/_time1
+        $U/_time1\
+        $U/_sleep
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
