@@ -37,6 +37,17 @@ sys_wait(void)
 }
 
 uint64
+sys_wait2(void)
+{
+  uint64 status;
+  uint64 usage;
+
+  argaddr(0, &status);
+  argaddr(1, &usage);
+  return kwait2(status, usage);
+}
+
+uint64
 sys_sbrk(void)
 {
   uint64 addr;
