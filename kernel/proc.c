@@ -757,3 +757,54 @@ procdump(void)
     printk("\n");
   }
 }
+// Copy process information to a user-provided array.
+int
+kgetprocs(uint64 addr)
+{
+  struct proc *p;
+  struct proc *caller = myproc();
+  struct pstat *list;
+  int count = 0;
+  int result;
+
+  // Store the snapshot in one allocated kernel page.
+  if (NPROC * sizeof(struct pstat) > PGSIZE)
+    return -1;
+
+  list = (struct pstat *)kalloc();
+  if (list == 0)
+    return -1;
+
+  memset(list, 0, PGSIZE);
+
+  // Protect parent pointers before acquiring process locks.
+  acquire(&wait_lock);
+  for (p = proc; p < &proc[NPROC]; p++) {
+    acquire(&p->lock);
+
+    if (p->state != UNUSED) {
+      list[count].pid = p->pid;
+      list[count].state = p->state;
+      list[count].size = p->sz;
+      list[count].ppid = p->parent ? p->parent->pid : 0;
+      safestrcpy(list[count].name, p->name,
+                 sizeof(list[count].name));
+      count++;
+    }
+
+    release(&p->lock);
+  }
+  release(&wait_lock);
+
+  // Copy the snapshot after releasing the process locks.
+  result = copyout(caller->pagetable, caller->sz, addr,
+                   (char *)list, count * sizeof(struct pstat));
+
+  kfree((void *)list);
+
+  if (result < 0)
+    return -1;
+
+  return count;
+}
+
