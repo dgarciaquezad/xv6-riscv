@@ -12,6 +12,7 @@ struct pstat {
   enum procstate state;
   uint64 size;
   int ppid;
+  int priority;             // Base priority
   char name[16];
 };
 #endif

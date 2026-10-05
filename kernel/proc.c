@@ -124,6 +124,7 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  p->priority = 0;
   p->cputime= 0;
   p->state = USED;
 
@@ -277,6 +278,7 @@ kfork(void)
     return -1;
   }
   np->sz = p->sz;
+  np->priority = p->priority;
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
@@ -784,6 +786,7 @@ kgetprocs(uint64 addr)
 
     if (p->state != UNUSED) {
       list[count].pid = p->pid;
+      list[count].priority = p->priority;
       list[count].state = p->state;
       list[count].size = p->sz;
       list[count].ppid = p->parent ? p->parent->pid : 0;

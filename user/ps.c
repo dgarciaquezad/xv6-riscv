@@ -9,13 +9,14 @@ main(int argc, char **argv)
   struct pstat uproc[NPROC];
   int nprocs;
   char *state;
+
   static char *states[] = {
-    [UNUSED]   = "unused",
-    [USED]     = "used",
+    [UNUSED]   = "unused  ",
+    [USED]     = "used    ",
     [SLEEPING] = "sleeping",
     [RUNNABLE] = "runnable",
-    [RUNNING]  = "running",
-    [ZOMBIE]   = "zombie"
+    [RUNNING]  = "running ",
+    [ZOMBIE]   = "zombie  "
   };
 
   nprocs = getprocs(uproc);
@@ -24,18 +25,24 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  printf("pid\tstate\t\tsize\tppid\tname\n");
+  printf("pid\tstate\t\tsize\tpriority\tppid\tname\n");
 
   for (int i = 0; i < nprocs; i++) {
-    state = "unknown";
+    state = "unknown ";
     if (uproc[i].state >= UNUSED &&
         uproc[i].state <= ZOMBIE)
       state = states[uproc[i].state];
 
-    printf("%d\t%s\t%ld\t%d\t%s\n",
+    printf("%d\t%s\t%ld\t%d\t\t%d\t%s\n",
            uproc[i].pid, state, (long)uproc[i].size,
-           uproc[i].ppid, uproc[i].name);
+           uproc[i].priority, uproc[i].ppid,
+           uproc[i].name);
   }
 
   exit(0);
 }
+
+
+
+
+
