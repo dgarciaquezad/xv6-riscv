@@ -125,6 +125,7 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->priority = 0;
+  p->readytime = 0;
   p->cputime= 0;
   p->state = USED;
 
@@ -228,7 +229,7 @@ userinit(void)
   initproc = p;
 
   p->cwd = namei("/");
-
+  p->readytime = ticks;
   p->state = RUNNABLE;
 
   release(&p->lock);
@@ -303,6 +304,7 @@ kfork(void)
   release(&wait_lock);
 
   acquire(&np->lock);
+  np->readytime = ticks;
   np->state = RUNNABLE;
   release(&np->lock);
 
@@ -562,6 +564,7 @@ yield(void)
 {
   struct proc *p = myproc();
   acquire(&p->lock);
+  p->readytime = ticks;
   p->state = RUNNABLE;
   sched();
   release(&p->lock);
@@ -648,6 +651,7 @@ wakeup(void *chan)
       // If this waiting process has gotten so far as to actually
       // go to sleep, also set it back to RUNNING.
       if (p->state == SLEEPING) {
+        p->readytime = ticks;
         p->state = RUNNABLE;
       }
     }
@@ -669,6 +673,7 @@ kkill(int pid)
       p->killed = 1;
       if (p->state == SLEEPING) {
         // Wake process from sleep().
+        p->readytime = ticks;
         p->state = RUNNABLE;
       }
       release(&p->lock);
@@ -787,6 +792,7 @@ kgetprocs(uint64 addr)
     if (p->state != UNUSED) {
       list[count].pid = p->pid;
       list[count].priority = p->priority;
+      list[count].readytime = p->readytime;
       list[count].state = p->state;
       list[count].size = p->sz;
       list[count].ppid = p->parent ? p->parent->pid : 0;
