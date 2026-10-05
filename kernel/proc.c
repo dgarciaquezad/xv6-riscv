@@ -493,7 +493,7 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
 
-#if SCHED_POLICY == SCHED_PRIORITY
+#if SCHED_POLICY == SCHED_PRIORITY || SCHED_POLICY == SCHED_AGING
   int next = 0;
 #endif
 
@@ -526,8 +526,7 @@ scheduler(void)
       release(&p->lock);
     }
 
-#elif SCHED_POLICY == SCHED_PRIORITY
-
+#elif SCHED_POLICY == SCHED_PRIORITY || SCHED_POLICY == SCHED_AGING
     struct proc *best = 0;
     int best_priority = -1;
     int best_index = -1;
@@ -539,13 +538,24 @@ scheduler(void)
 
       acquire(&p->lock);
 
-      if (p->state == RUNNABLE &&
-          p->priority > best_priority) {
-        best = p;
-        best_priority = p->priority;
-        best_index = index;
-      }
+      if (p->state == RUNNABLE) {
+        int effective = p->priority;
 
+#if SCHED_POLICY == SCHED_AGING
+        uint age = ticks - p->readytime;
+
+        if (age >= (uint)(99 - p->priority))
+          effective = 99;
+        else
+          effective = p->priority + (int)age;
+#endif
+
+        if (effective > best_priority) {
+          best = p;
+          best_priority = effective;
+          best_index = index;
+        }
+      }
       release(&p->lock);
     }
 

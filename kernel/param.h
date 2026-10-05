@@ -15,6 +15,7 @@
 // Scheduler policies
 #define SCHED_RR       0
 #define SCHED_PRIORITY 1
+#define SCHED_AGING    2
 
 // Select the scheduler policy.
-#define SCHED_POLICY SCHED_PRIORITY
+#define SCHED_POLICY SCHED_AGING
