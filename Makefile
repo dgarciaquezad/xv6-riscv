@@ -159,6 +159,7 @@ UPROGS=\
         $U/_pexec\
         $U/_schedtest\
         $U/_agingtest\
+        $U/_intertest\
         $U/_sleep
 
 fs.img: mkfs/mkfs README $(UPROGS)
